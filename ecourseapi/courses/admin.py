@@ -4,7 +4,7 @@ from django.db.models import Count
 from django.template.response import TemplateResponse
 from django.utils.safestring import mark_safe
 from django.urls import path
-from courses.models import Category,Course,Lesson,User
+from courses.models import Category,Course,Lesson,User,Tag,Comment,Like
 
 
 class MyAdminSite(admin.AdminSite):
@@ -43,5 +43,8 @@ admin_site.register(User, UserAdmin)
 admin_site.register(Category,CategoryAdmin)
 admin_site.register(Course,CourseAdmin)
 admin_site.register(Lesson,LessonAdmin)
+admin_site.register(Tag)
+admin_site.register(Comment)
+admin_site.register(Like)
 
 

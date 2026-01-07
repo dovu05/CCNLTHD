@@ -1,25 +1,64 @@
-echo "=== RESET DATABASE ==="
-python manage.py flush --no-input
 
-echo "=== MIGRATE ==="
-python manage.py migrate
+echo "🚀 Seeding database..."
 
-echo "=== INSERT SAMPLE DATA ==="
-python manage.py shell <<EOF
-from courses.models import Category, Course, Tag, Lesson
+python manage.py shell << 'EOF'
+from courses.models import Category, Course, Lesson, User
+from django.utils import timezone
+import random
 
-c1 = Category.objects.create(name='Software Engineering')
-c2 = Category.objects.create(name='Artificial Intelligence')
-c3 = Category.objects.create(name='Data Sciences')
+# ===== 1. TẠO USER =====
+print("👤 Creating users...")
 
-co1 = Course.objects.create(subject='Introduction to SE', description='demo', image='https://res.cloudinary.com/dxxwcby8l/image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', category=c1)
-co2 = Course.objects.create(subject='Software Testing', description='demo', image='https://res.cloudinary.com/dxxwcby8l/image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', category=c1)
+teacher, _ = User.objects.get_or_create(
+    username="teacher1",
+    defaults={
+        "role": User.TEACHER,
+        "email": "teacher1@gmail.com"
+    }
+)
+teacher.set_password("123456")
+teacher.save()
 
-t1 = Tag.objects.create(name='techniques')
-t2 = Tag.objects.create(name='software')
+student, _ = User.objects.get_or_create(
+    username="student1",
+    defaults={
+        "role": User.STUDENT,
+        "email": "student1@gmail.com"
+    }
+)
+student.set_password("123456")
+student.save()
 
-l1 = Lesson.objects.create(subject='SE Overview', content='Demo', image='https://res.cloudinary.com/dxxwcby8l/image/upload/v1709565062/rohn1l6xtpxedyqgyncs.png', course=co1)
-l1.tags.set([t1, t2])
+# ===== 2. TẠO CATEGORY =====
+print("📂 Creating categories...")
+categories = []
+for i in range(1, 11):
+    cat, _ = Category.objects.get_or_create(name=f"Category {i}")
+    categories.append(cat)
 
-print("✅ Done")
+# ===== 3. TẠO COURSE =====
+print("📘 Creating courses...")
+courses = []
+for i in range(1, 21):
+    course = Course.objects.create(
+        subject=f"Course {i}",
+        description=f"Description for course {i}",
+        price=random.choice([0, 99, 199, 299]),
+        category=random.choice(categories),
+        teacher=teacher,
+        created_date=timezone.now()
+    )
+    courses.append(course)
+
+# ===== 4. TẠO LESSON =====
+print("📚 Creating lessons...")
+for i in range(1, 31):
+    Lesson.objects.create(
+        subject=f"Lesson {i}",
+        content=f"<p>Content for lesson {i}</p>",
+        course=random.choice(courses),
+        created_date=timezone.now()
+    )
+
+print("✅ DONE! Database seeded successfully.")
 EOF

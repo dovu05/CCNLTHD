@@ -1,3 +1,4 @@
+from django.utils import timezone
 from ckeditor.fields import RichTextField
 from cloudinary.models import CloudinaryField
 from django.contrib.auth.models import AbstractUser
@@ -83,6 +84,7 @@ class Enrollment(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     enrolled_date = models.DateTimeField(auto_now_add=True)
 
+
     class Meta:
         unique_together = ('student', 'course')
 
@@ -94,7 +96,7 @@ class Lesson(BaseModel):
     subject = models.CharField(max_length=255)
     content = RichTextField()
     image = CloudinaryField(null=True, blank=True)
-    course = models.ForeignKey(Course, on_delete=models.PROTECT)
+    course = models.ForeignKey(Course, on_delete=models.RESTRICT)
     tags = models.ManyToManyField(Tag, blank=True)
 
     class Meta:
@@ -102,3 +104,20 @@ class Lesson(BaseModel):
 
     def __str__(self):
         return self.subject
+
+class Interaction(BaseModel):
+    user = models.ForeignKey(User,null=False,on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lesson,null=False,on_delete=models.CASCADE)
+
+    class Meta:
+        abstract = True
+
+
+class Comment(Interaction):
+    content = models.TextField(null=False,blank=False)
+
+
+class Like(Interaction):
+    class Meta:
+        unique_together = ('user', 'lesson')
+

@@ -55,8 +55,8 @@ INSTALLED_APPS = [
     'ckeditor_uploader',
     'rest_framework',
     'drf_yasg',
+    'oauth2_provider',
 ]
-
 
 CKEDITOR_UPLOAD_PATH = "images/ckeditors/"
 
@@ -69,6 +69,12 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+    )
+}
 
 ROOT_URLCONF = 'ecourseapi.urls'
 
@@ -114,6 +120,9 @@ AUTH_USER_MODEL = "courses.User"
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
+
+CLIENT_ID = "MJxdRyIYcPfIcrIbnNR9TUxTnPou7reWHJMALxNx"
+CLIENT_SECRET = "AXMFFObk4SNzrNIs4DAYtxJ9N69It2NpoRUkD6KYFhf0r8sBeQoNeva6nNk4uPYoqyT8HM3hlxG6HxnFzCW90Sq6eImGMhXbJ0mcbpWxTBVNmdGmlcPINiSrmjlBh1Y4"
 
 AUTH_PASSWORD_VALIDATORS = [
     {
