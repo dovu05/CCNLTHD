@@ -4,4 +4,4 @@ class ItemPaginator(pagination.PageNumberPagination):
     page_size = 20
 
 class CommentPaginator(pagination.PageNumberPagination):
-    page_size = 2
+    page_size = 5
