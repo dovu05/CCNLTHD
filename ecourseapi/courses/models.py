@@ -58,8 +58,6 @@ class Course(BaseModel):
         related_name='courses'
     )
 
-
-
     class Meta:
         unique_together = ('subject', 'category')
 
@@ -74,22 +72,7 @@ class Tag(BaseModel):
         return self.name
 
 
-class Enrollment(models.Model):
-    student = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        limit_choices_to={'role': User.STUDENT},
-        related_name='enrollments'
-    )
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    enrolled_date = models.DateTimeField(auto_now_add=True)
 
-
-    class Meta:
-        unique_together = ('student', 'course')
-
-    def __str__(self):
-        return f"{self.student.username} - {self.course.subject}"
 
 
 class Lesson(BaseModel):
@@ -120,4 +103,37 @@ class Comment(Interaction):
 class Like(Interaction):
     class Meta:
         unique_together = ('user', 'lesson')
+
+class Enrollment(models.Model):
+    student = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='enrollments'
+    )
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    enrolled_date = models.DateTimeField(auto_now_add=True)
+
+
+    class Meta:
+        unique_together = ('student', 'course')
+
+    def __str__(self):
+        return f"{self.student.username} - {self.course.subject}"
+
+
+class Receipt(BaseModel):
+    PAYMENT_METHODS = (
+        ('CASH', 'Tiền mặt'),
+        ('MOMO', 'MoMo'),
+        ('ZALOPAY', 'ZaloPay'),
+        ('STRIPE', 'Stripe'),
+        ('PAYPAL', 'PayPal'),
+    )
+    student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='receipts')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_method = models.CharField(max_length=50, choices=PAYMENT_METHODS, default='CASH')
+
+    def __str__(self):
+        return f"Receipt {self.id} - {self.student.username}"
 

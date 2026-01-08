@@ -1,6 +1,6 @@
 
 
-from courses.models import Category, Course, Lesson, Tag, User, Comment
+from courses.models import Category, Course, Lesson, Tag, User, Comment, Receipt
 from rest_framework import serializers
 
 
@@ -10,40 +10,6 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name']
-
-class CourseSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Course
-        fields = ['id', 'subject', 'created_date','image','category']
-
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-
-        if instance.image:
-            data['image'] = instance.image.url
-
-        return data
-
-class LessonSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Lesson
-        fields = ['id', 'subject', 'created_date','course']
-
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = '__all__'
-
-
-
-class LessonDetailsSerializer(LessonSerializer):
-    tags = TagSerializer(many=True)
-
-    class Meta:
-        model = LessonSerializer.Meta.model
-        fields = LessonSerializer.Meta.fields + ['tags','content']
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -70,6 +36,49 @@ class UserSerializer(serializers.ModelSerializer):
 
         return data
 
+class CourseSerializer(serializers.ModelSerializer):
+    teacher = UserSerializer(read_only=True)
+    class Meta:
+        model = Course
+        fields = ['id', 'subject', 'created_date','image','category', 'price', 'teacher']
+
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        if instance.image:
+            data['image'] = instance.image.url
+
+        return data
+
+class LessonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Lesson
+        fields = ['id', 'subject', 'created_date','course','image']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if instance.image:
+            data['image'] = instance.image.url
+        return data
+
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = '__all__'
+
+
+
+class LessonDetailsSerializer(LessonSerializer):
+    tags = TagSerializer(many=True)
+
+    class Meta:
+        model = LessonSerializer.Meta.model
+        fields = LessonSerializer.Meta.fields + ['tags','content']
+
+
+
 class CommentSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -86,4 +95,11 @@ class CommentSerializer(serializers.ModelSerializer):
                 'write_only': True,
             }
         }
+
+class ReceiptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Receipt
+        fields = ['id','amount','payment_method','created_date']
+
+
 

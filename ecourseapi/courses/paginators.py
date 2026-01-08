@@ -1,7 +1,7 @@
 from rest_framework import pagination
 
 class ItemPaginator(pagination.PageNumberPagination):
-    page_size = 5
+    page_size = 20
 
 class CommentPaginator(pagination.PageNumberPagination):
     page_size = 2
