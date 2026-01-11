@@ -1,0 +1,15 @@
+{
+  "apperance": [
+    {
+      "value": "light",
+      "label": "Sáng",
+      "icon": "white-balance-sunny"
+    },
+
+    {
+      "value": "dark",
+      "label": "Tối",
+      "icon": "weather-night"
+    }
+  ]
+}
