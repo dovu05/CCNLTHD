@@ -2,7 +2,7 @@ import { View, Text, ScrollView, Image, TouchableOpacity, useWindowDimensions, K
 import { useEffect, useState, useContext, useCallback } from "react";
 import { ActivityIndicator, Avatar, Button, Card, Divider, Icon, TextInput } from "react-native-paper";
 import RenderHtml from "react-native-render-html";
-import YoutubePlayer from "react-native-youtube-iframe";
+import { Video, ResizeMode } from "expo-av";
 import { MyColorContext } from "../../utils/contexts/MyColorContext";
 import { MyUserContext } from "../../utils/contexts/MyContext";
 import { MockApi } from "../../services/MockDataService"; // Dùng Mock
