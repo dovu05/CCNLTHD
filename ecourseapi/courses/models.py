@@ -21,7 +21,10 @@ class User(AbstractUser):
         choices=ROLE_CHOICES,
         default=STUDENT
     )
-    avatar = CloudinaryField(null=True, blank=True)
+    avatar = CloudinaryField('avatar', null=True, blank=True)  # [cite: 5]
+
+    #  Giảng viên cần được duyệt và xác minh trước khi tạo khóa học
+    is_verified = models.BooleanField(default=False)
 
     def __str__(self):
         return self.username
@@ -46,9 +49,17 @@ class Category(models.Model):
 
 class Course(BaseModel):
     subject = models.CharField(max_length=255)
-    description = models.TextField(null=True, blank=True)
-    image = CloudinaryField(null=True, blank=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    description = models.TextField(null=True, blank=True)  # Mô tả chi tiết
+    image = CloudinaryField('image', null=True, blank=True)  # Hình ảnh minh họa
+
+    #  Video giới thiệu
+    trailer_video = CloudinaryField('video', resource_type='video', null=True, blank=True)
+
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # Học phí
+
+    #  Thời lượng học (tính bằng giờ hoặc phút) phục vụ so sánh
+    duration = models.IntegerField(default=0, help_text="Duration in minutes")
+
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     teacher = models.ForeignKey(
         User,
@@ -72,14 +83,11 @@ class Tag(BaseModel):
         return self.name
 
 
-
-
-
 class Lesson(BaseModel):
     subject = models.CharField(max_length=255)
     content = RichTextField()
     image = CloudinaryField(null=True, blank=True)
-    course = models.ForeignKey(Course, on_delete=models.RESTRICT)
+    course = models.ForeignKey(Course, on_delete=models.RESTRICT, related_name='lessons')
     tags = models.ManyToManyField(Tag, blank=True)
 
     class Meta:
@@ -88,21 +96,47 @@ class Lesson(BaseModel):
     def __str__(self):
         return self.subject
 
+
+#  Hệ thống cần cho phép giảng viên theo dõi tiến độ học tập của từng sinh viên
+class LessonProgress(BaseModel):
+    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    completed = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('student', 'lesson')
+
+    def __str__(self):
+        return f"{self.student.username} - {self.lesson.subject}"
+
+
 class Interaction(BaseModel):
-    user = models.ForeignKey(User,null=False,on_delete=models.CASCADE)
-    lesson = models.ForeignKey(Lesson,null=False,on_delete=models.CASCADE)
+    user = models.ForeignKey(User, null=False, on_delete=models.CASCADE)
+    lesson = models.ForeignKey(Lesson, null=False, on_delete=models.CASCADE)
 
     class Meta:
         abstract = True
 
 
 class Comment(Interaction):
-    content = models.TextField(null=False,blank=False)
+    content = models.TextField(null=False, blank=False)
 
 
 class Like(Interaction):
     class Meta:
         unique_together = ('user', 'lesson')
+
+
+#  Hỗ trợ so sánh/đánh giá khóa học (Mở rộng thêm Rating cho Course)
+class Rating(BaseModel):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='ratings')
+    rate = models.PositiveSmallIntegerField(default=5)  # 1-5 sao
+    comment = models.TextField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('user', 'course')
+
 
 class Enrollment(models.Model):
     student = models.ForeignKey(
@@ -113,7 +147,6 @@ class Enrollment(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     enrolled_date = models.DateTimeField(auto_now_add=True)
 
-
     class Meta:
         unique_together = ('student', 'course')
 
@@ -121,6 +154,7 @@ class Enrollment(models.Model):
         return f"{self.student.username} - {self.course.subject}"
 
 
+# [cite: 13, 14] Ghi nhận giao dịch và phương thức thanh toán
 class Receipt(BaseModel):
     PAYMENT_METHODS = (
         ('CASH', 'Tiền mặt'),
@@ -136,4 +170,3 @@ class Receipt(BaseModel):
 
     def __str__(self):
         return f"Receipt {self.id} - {self.student.username}"
-
